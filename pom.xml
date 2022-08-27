@@ -4,7 +4,7 @@
 
 	<groupId>com.itranswarp</groupId>
 	<artifactId>compiler</artifactId>
-	<version>1.0</version>
+	<version>1.0-GAZIVODAG</version>
 	<packaging>jar</packaging>
 
 	<name>compiler</name>
