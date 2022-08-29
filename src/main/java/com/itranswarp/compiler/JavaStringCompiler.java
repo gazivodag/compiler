@@ -2,8 +2,7 @@ package com.itranswarp.compiler;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -33,45 +32,46 @@ public class JavaStringCompiler {
 	}
 
 	/**
-	 * Compile a Java source file in memory.
-	 * 
-	 * @param fileName
-	 *            Java file name, e.g. "Test.java"
-	 * @param source
-	 *            The source code as String.
-	 * @return The compiled results as Map that contains class name as key,
-	 *         class binary as value.
+	 * Compile a Java map of source files in memory.
+	 *
+	 * @param nameSourceMap Key being ClassFile.java, value being source code
+	 * @return a map with the key being the fully qualified class name, and the value being bytecode
 	 * @throws IOException
-	 *             If compile error.
 	 */
-	public Map<String, byte[]> compile(String fileName, String source) throws IOException {
+	public Map<String, byte[]> compile(Map<String, String> nameSourceMap) throws IOException {
 		try (MemoryJavaFileManager manager = new MemoryJavaFileManager(stdManager)) {
-			JavaFileObject javaFileObject = manager.makeStringSource(fileName, source);
-			CompilationTask task = compiler.getTask(writer, manager, null, null, null, Arrays.asList(javaFileObject));
+
+//			JavaFileObject javaFileObject = manager.makeStringSource(fileName, source);
+
+			List<JavaFileObject> jfos = new ArrayList<>();
+			for (Map.Entry<String, String> entry : nameSourceMap.entrySet())
+				jfos.add(manager.makeStringSource(entry.getKey(), entry.getValue()));
+
+			CompilationTask task = compiler.getTask(writer, manager, null, null, null, jfos);
+
 			Boolean result = task.call();
+
 			if (result == null || !result.booleanValue()) {
 				throw new RuntimeException("Compilation failed.");
 			}
+
 			return manager.getClassBytes();
 		}
 	}
 
 	/**
-	 * Load class from compiled classes.
-	 * 
-	 * @param name
-	 *            Full class name.
-	 * @param classBytes
-	 *            Compiled results as a Map.
-	 * @return The Class instance.
-	 * @throws ClassNotFoundException
-	 *             If class not found.
+	 * Uses an in-memory classloader to load a map of compiled classes
+	 * @param classBytes The result from JavaStringCompiler.compile()
+	 * @return ArrayList of Class objects
 	 * @throws IOException
-	 *             If load error.
+	 * @throws ClassNotFoundException
 	 */
-	public Class<?> loadClass(String name, Map<String, byte[]> classBytes) throws ClassNotFoundException, IOException {
+	public List<Class<?>> getAllClasses(Map<String, byte[]> classBytes) throws IOException, ClassNotFoundException {
 		try (MemoryClassLoader classLoader = new MemoryClassLoader(classBytes)) {
-			return classLoader.loadClass(name);
+			List<Class<?>> classes = new ArrayList<>();
+			for (Map.Entry<String, byte[]> entry : classBytes.entrySet())
+				classes.add(classLoader.loadClass(entry.getKey()));
+			return classes;
 		}
 	}
 }

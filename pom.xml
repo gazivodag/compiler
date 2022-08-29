@@ -4,7 +4,7 @@
 
 	<groupId>com.itranswarp</groupId>
 	<artifactId>compiler</artifactId>
-	<version>1.0-GAZIVODAG</version>
+	<version>1.1-GAZIVODAG-MULTIPLE</version>
 	<packaging>jar</packaging>
 
 	<name>compiler</name>
@@ -37,7 +37,7 @@
 		<!-- source encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- project version -->
-		<project.version>1.0-GAZIVODAG</project.version>
+		<project.version>1.1-GAZIVODAG-MULTIPLE</project.version>
 		<!-- maven time format -->
 		<maven.build.timestamp.format>yyyyMMdd_HHmmss</maven.build.timestamp.format>
 		<!-- artifact version -->
